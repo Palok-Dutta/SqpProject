@@ -1,6 +1,8 @@
-import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
+import javax.swing.*;
 
 
 public class TigerTrap extends JFrame{
@@ -15,9 +17,7 @@ public class TigerTrap extends JFrame{
         setTitle("Trap the Tiger");
         setSize(500, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ImageIcon tigerIcon = new ImageIcon("E:\\Photos\\red.png");
-        Image scaledImage = tigerIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
-        resizedIcon = new ImageIcon(scaledImage); // field assignment
+        resizedIcon = loadTigerIcon();
         
         JPanel boardPanel = new JPanel();
         boardPanel.setLayout(new GridLayout(5, 5));
@@ -36,6 +36,23 @@ public class TigerTrap extends JFrame{
 
         add(boardPanel);
         setVisible(true);
+    }
+
+    private ImageIcon loadTigerIcon() {
+        File imageFile = new File("D:/red.png");
+        if (imageFile.isFile()) {
+            Image image = new ImageIcon(imageFile.getAbsolutePath()).getImage();
+            if (image.getWidth(null) > 0 && image.getHeight(null) > 0) {
+                return new ImageIcon(image.getScaledInstance(40, 40, Image.SCALE_SMOOTH));
+            }
+        }
+
+        BufferedImage fallback = new BufferedImage(40, 40, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = fallback.createGraphics();
+        graphics.setColor(Color.RED);
+        graphics.fillOval(4, 4, 32, 32);
+        graphics.dispose();
+        return new ImageIcon(fallback);
     }
 
     private java.util.List<Integer> getAdjacent(int pos) {
