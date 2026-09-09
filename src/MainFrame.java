@@ -5,10 +5,11 @@ public class MainFrame extends JFrame {
 
     private CardLayout cardLayout;
     private JPanel mainPanel;
+    private TigerTrapPanel tigerTrapPanel;
 
     public MainFrame() {
-        setTitle("Sudoku Arena");
-        setSize(500, 600);
+        setTitle("Trap the Tiger");
+        setSize(650, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -18,7 +19,8 @@ public class MainFrame extends JFrame {
         // Add each screen as a "card"
         mainPanel.add(new LoginPanel(this), "LOGIN");
         mainPanel.add(new MenuPanel(this), "MENU");
-        mainPanel.add(new GamePanel(this), "GAME");
+        tigerTrapPanel = new TigerTrapPanel(this::returnToMenu);
+        mainPanel.add(tigerTrapPanel, "GAME");
 
         add(mainPanel);
         setVisible(true);
@@ -27,7 +29,14 @@ public class MainFrame extends JFrame {
     }
 
     public void showScreen(String name) {
+        if (name.equals("GAME")) {
+            tigerTrapPanel.resetGame();
+        }
         cardLayout.show(mainPanel, name);
+    }
+
+    private void returnToMenu() {
+        showScreen("MENU");
     }
 
     public static void main(String[] args) {

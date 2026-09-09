@@ -9,7 +9,7 @@ public class MenuPanel extends JPanel {
         JLabel title = new JLabel("Welcome! Choose difficulty:");
         title.setFont(new Font("Arial", Font.BOLD, 18));
 
-        JButton playButton = new JButton("Play Sudoku");
+        JButton playButton = new JButton("Play Trap the Tiger");
         playButton.addActionListener(e -> mainFrame.showScreen("GAME"));
 
         GridBagConstraints gbc = new GridBagConstraints();
