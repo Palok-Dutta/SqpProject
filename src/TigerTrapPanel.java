@@ -30,8 +30,9 @@ public class TigerTrapPanel extends JPanel {
 
     public void resetGame() {
         game = new GameManager(new GameBoard());
-        message = "Tiger's turn: click the tiger to see its moves.";
+        message = "Tiger is choosing a move...";
         repaint();
+        javax.swing.SwingUtilities.invokeLater(this::runTigerTurn);
     }
 
     private void handleClick(int x, int y) {
@@ -56,10 +57,26 @@ public class TigerTrapPanel extends JPanel {
                     onGameOver.run();
                     return;
                 }
-                message = "Tiger's turn: click the tiger to see its moves.";
+                message = "Tiger is choosing a move...";
+                repaint();
+                javax.swing.SwingUtilities.invokeLater(this::runTigerTurn);
             } else {
                 message = "Select a blocker, then click a highlighted point.";
             }
+        }
+        repaint();
+    }
+
+    private void runTigerTurn() {
+        if (game.isGameOver() || game.getTurn() != GameManager.Turn.TIGER) return;
+        if (game.moveTigerRandomly()) {
+            message = "Blocker's turn: select a blocker.";
+        } else {
+            message = "The tiger is trapped. Blockers win!";
+            repaint();
+            javax.swing.JOptionPane.showMessageDialog(this, message);
+            onGameOver.run();
+            return;
         }
         repaint();
     }

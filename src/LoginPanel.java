@@ -16,7 +16,7 @@ public class LoginPanel extends JPanel {
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel title = new JLabel("Sudoku Arena");
+        JLabel title = new JLabel("Trap Arena");
         title.setFont(new Font("Arial", Font.BOLD, 20));
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         add(title, gbc);
@@ -50,17 +50,58 @@ public class LoginPanel extends JPanel {
         add(messageLabel, gbc);
 
         loginButton.addActionListener(e -> handleLogin());
+        registerButton.addActionListener(e -> handleRegister());
+    }
+
+    private void handleRegister() {
+        String username = usernameField.getText().trim();
+        String password = new String(passwordField.getPassword());
+
+        if (username.isEmpty() || password.isEmpty()) {
+            messageLabel.setText("Enter a username and password to register.");
+            return;
+        }
+
+        try {
+            if (Database.registerUser(username, password)) {
+                messageLabel.setForeground(new Color(0, 128, 0));
+                messageLabel.setText("Registration successful. You can now log in.");
+                passwordField.setText("");
+            } else {
+                messageLabel.setForeground(Color.RED);
+                messageLabel.setText("That username or password is already in use.");
+            }
+        } catch (java.sql.SQLException exception) {
+            messageLabel.setForeground(Color.RED);
+            messageLabel.setText("Database connection failed.");
+            JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void handleLogin() {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword());
 
-        // Placeholder — replace with real DB check later
-        if (username.equals("test") && password.equals("test")) {
-            mainFrame.showScreen("MENU"); // go to menu screen after login
-        } else {
-            messageLabel.setText("Invalid username or password.");
+        if (username.isEmpty() || password.isEmpty()) {
+            messageLabel.setForeground(Color.RED);
+            messageLabel.setText("Enter both username and password.");
+            return;
+        }
+
+        try {
+            Database.LoginResult result = Database.authenticate(username, password);
+            if (result != null) {
+                mainFrame.login(result);
+                messageLabel.setText(" ");
+            } else {
+                messageLabel.setForeground(Color.RED);
+                messageLabel.setText("Invalid username or password.");
+            }
+        } catch (java.sql.SQLException exception) {
+            messageLabel.setText("Database connection failed.");
+            JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

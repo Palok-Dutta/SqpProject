@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class GameManager {
     public enum Turn { TIGER, BLOCKER }
@@ -13,6 +14,7 @@ public class GameManager {
     private Blocker selectedBlocker;
     private boolean tigerSelected;
     private boolean gameOver;
+    private final Random random = new Random();
 
     public GameManager(GameBoard board) {
         this.board = board;
@@ -45,6 +47,18 @@ public class GameManager {
         if (turn != Turn.TIGER || !tigerSelected || !getSelectableNodes().contains(destination)) return false;
         tiger.moveTo(destination);
         tigerSelected = false;
+        turn = Turn.BLOCKER;
+        return true;
+    }
+
+    public boolean moveTigerRandomly() {
+        if (turn != Turn.TIGER || gameOver) return false;
+        List<Node> availableNodes = getFreeNeighbors(tiger.getPosition());
+        if (availableNodes.isEmpty()) {
+            gameOver = true;
+            return false;
+        }
+        tiger.moveTo(availableNodes.get(random.nextInt(availableNodes.size())));
         turn = Turn.BLOCKER;
         return true;
     }

@@ -6,6 +6,8 @@ public class MainFrame extends JFrame {
     private CardLayout cardLayout;
     private JPanel mainPanel;
     private TigerTrapPanel tigerTrapPanel;
+    private MenuPanel menuPanel;
+    private Database.LoginResult loggedInUser;
 
     public MainFrame() {
         setTitle("Trap the Tiger");
@@ -18,8 +20,9 @@ public class MainFrame extends JFrame {
 
         // Add each screen as a "card"
         mainPanel.add(new LoginPanel(this), "LOGIN");
-        mainPanel.add(new MenuPanel(this), "MENU");
-        tigerTrapPanel = new TigerTrapPanel(this::returnToMenu);
+        menuPanel = new MenuPanel(this);
+        mainPanel.add(menuPanel, "MENU");
+        tigerTrapPanel = new TigerTrapPanel(this::finishGame);
         mainPanel.add(tigerTrapPanel, "GAME");
 
         add(mainPanel);
@@ -33,6 +36,26 @@ public class MainFrame extends JFrame {
             tigerTrapPanel.resetGame();
         }
         cardLayout.show(mainPanel, name);
+    }
+
+    public void login(Database.LoginResult user) {
+        loggedInUser = user;
+        menuPanel.setLoggedInUser(user);
+        showScreen("MENU");
+    }
+
+    private void finishGame() {
+        if (loggedInUser != null && !loggedInUser.isAdmin()) {
+            try {
+                Database.recordMatch(loggedInUser.getUserId(), 1);
+            } catch (java.sql.SQLException exception) {
+                JOptionPane.showMessageDialog(this,
+                        "The game ended, but its statistics could not be saved.\n"
+                                + exception.getMessage(),
+                        "Database Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        returnToMenu();
     }
 
     private void returnToMenu() {
