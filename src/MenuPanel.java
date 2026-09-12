@@ -3,9 +3,15 @@ import java.awt.*;
 
 public class MenuPanel extends JPanel {
     private final JButton statusButton = new JButton("Show status");
+    private final JLabel scoreLabel = new JLabel("Total score: 0");
 
     public MenuPanel(MainFrame mainFrame) {
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
+        scoreLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        scoreLabel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 18));
+        add(scoreLabel, BorderLayout.NORTH);
+
+        JPanel menuContent = new JPanel(new GridBagLayout());
 
         JLabel title = new JLabel("Welcome!");
         title.setFont(new Font("Arial", Font.BOLD, 18));
@@ -19,17 +25,32 @@ public class MenuPanel extends JPanel {
         gbc.insets = new Insets(10, 10, 10, 10);
 
         gbc.gridy = 0;
-        add(title, gbc);
+        menuContent.add(title, gbc);
 
         gbc.gridy = 1;
-        add(playButton, gbc);
+        menuContent.add(playButton, gbc);
 
         gbc.gridy = 2;
-        add(statusButton, gbc);
+        menuContent.add(statusButton, gbc);
+        add(menuContent, BorderLayout.CENTER);
     }
 
     public void setLoggedInUser(Database.LoginResult user) {
         statusButton.setVisible(user.isAdmin());
+        refreshScore(user);
+    }
+
+    public void refreshScore(Database.LoginResult user) {
+        if (user == null || user.isAdmin()) {
+            scoreLabel.setText("Total score: 0");
+            return;
+        }
+
+        try {
+            scoreLabel.setText("Total score: " + Database.getTotalScore(user.getUserId()));
+        } catch (java.sql.SQLException exception) {
+            scoreLabel.setText("Total score: unavailable");
+        }
     }
 
     private void showStatus() {

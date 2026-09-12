@@ -5,7 +5,7 @@ public class TigerTrap extends JFrame {
     public TigerTrap() {
         setTitle("Trap the Tiger");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(new TigerTrapPanel(() -> { }));
+        setContentPane(new TigerTrapPanel(score -> { }));
         pack();
         setLocationRelativeTo(null);
         setResizable(false);

@@ -90,6 +90,19 @@ public final class Database {
         }
     }
 
+    public static int getTotalScore(int userId) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(score), 0) AS total_score "
+                + "FROM Game_Stat WHERE user_id = ?";
+        try (Connection connection = getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, userId);
+            try (ResultSet result = statement.executeQuery()) {
+                result.next();
+                return result.getInt("total_score");
+            }
+        }
+    }
+
     private static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }

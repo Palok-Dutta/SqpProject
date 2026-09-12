@@ -44,10 +44,11 @@ public class MainFrame extends JFrame {
         showScreen("MENU");
     }
 
-    private void finishGame() {
+    private void finishGame(int score) {
         if (loggedInUser != null && !loggedInUser.isAdmin()) {
             try {
-                Database.recordMatch(loggedInUser.getUserId(), 1);
+                Database.recordMatch(loggedInUser.getUserId(), score);
+                menuPanel.refreshScore(loggedInUser);
             } catch (java.sql.SQLException exception) {
                 JOptionPane.showMessageDialog(this,
                         "The game ended, but its statistics could not be saved.\n"

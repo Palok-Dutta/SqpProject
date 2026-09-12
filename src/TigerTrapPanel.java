@@ -8,15 +8,27 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.function.Consumer;
 
 public class TigerTrapPanel extends JPanel {
     private static final int NODE_RADIUS = 16;
-    private final Runnable onGameOver;
+    private final Consumer<Integer> onGameOver;
     private GameManager game;
     private String message = "Tiger's turn: click the tiger to see its moves.";
+    private final javax.swing.Timer gameTimer;
+    private final javax.swing.JLabel timerLabel = new javax.swing.JLabel("Time: 0 seconds");
+    private int secondsElapsed;
 
-    public TigerTrapPanel(Runnable onGameOver) {
+    public TigerTrapPanel(Consumer<Integer> onGameOver) {
         this.onGameOver = onGameOver;
+        gameTimer = new javax.swing.Timer(1000, event -> {
+            secondsElapsed++;
+            timerLabel.setText("Time: " + secondsElapsed + " seconds");
+        });
+        setLayout(new java.awt.BorderLayout());
+        timerLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        timerLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 8, 8, 16));
+        add(timerLabel, java.awt.BorderLayout.NORTH);
         resetGame();
         setPreferredSize(new Dimension(600, 600));
         setBackground(new Color(248, 248, 244));
@@ -29,9 +41,13 @@ public class TigerTrapPanel extends JPanel {
     }
 
     public void resetGame() {
+        gameTimer.stop();
+        secondsElapsed = 0;
+        timerLabel.setText("Time: 0 seconds");
         game = new GameManager(new GameBoard());
         message = "Tiger is choosing a move...";
         repaint();
+        gameTimer.start();
         javax.swing.SwingUtilities.invokeLater(this::runTigerTurn);
     }
 
@@ -52,9 +68,12 @@ public class TigerTrapPanel extends JPanel {
             } else if (game.moveBlocker(clicked)) {
                 if (game.isGameOver()) {
                     message = "The tiger is trapped. Blockers win!";
+                    int finalScore = finishGame();
                     repaint();
-                    javax.swing.JOptionPane.showMessageDialog(this, message);
-                    onGameOver.run();
+                    javax.swing.JOptionPane.showMessageDialog(this,
+                            message + "\nTime: " + secondsElapsed + " seconds"
+                                    + "\nFinal score: " + finalScore);
+                    onGameOver.accept(finalScore);
                     return;
                 }
                 message = "Tiger is choosing a move...";
@@ -73,12 +92,20 @@ public class TigerTrapPanel extends JPanel {
             message = "Blocker's turn: select a blocker.";
         } else {
             message = "The tiger is trapped. Blockers win!";
+            int finalScore = finishGame();
             repaint();
-            javax.swing.JOptionPane.showMessageDialog(this, message);
-            onGameOver.run();
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    message + "\nTime: " + secondsElapsed + " seconds"
+                            + "\nFinal score: " + finalScore);
+            onGameOver.accept(finalScore);
             return;
         }
         repaint();
+    }
+
+    private int finishGame() {
+        gameTimer.stop();
+        return 1000 - (secondsElapsed * 20);
     }
 
     private Node findNode(int x, int y) {
