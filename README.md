@@ -53,8 +53,8 @@ new user is inserted into `User`; that username and password can then be used
 with **Login** to open the game menu. Admins authenticate against `Admin` and
 see the **Show status** button in the menu. The status window lists every row
 in `User` with its password, total match count, and total score. A completed
-Tiger Trap match inserts one row into `Game_Stat` with `matches_played = 1` and
-a score of `1` for the logged-in user.
+Tiger Trap match adds its score to the logged-in user's existing `Game_Stat` row
+and increments `matches_played`; the first match creates that row.
 
 The game is single-player: the logged-in player controls the blockers. The
 Tiger is controlled by a bot that automatically chooses a random available

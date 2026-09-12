@@ -80,13 +80,29 @@ public final class Database {
     }
 
     public static void recordMatch(int userId, int score) throws SQLException {
-        String sql = "INSERT INTO Game_Stat (username, matches_played, score, user_id) "
+        String updateSql = "UPDATE Game_Stat SET matches_played = matches_played + 1, "
+                + "score = score + ? WHERE user_id = ? LIMIT 1";
+        String insertSql = "INSERT INTO Game_Stat (username, matches_played, score, user_id) "
                 + "SELECT username, 1, ?, user_id FROM `User` WHERE user_id = ?";
-        try (Connection connection = getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, score);
-            statement.setInt(2, userId);
-            statement.executeUpdate();
+
+        try (Connection connection = getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+                updateStatement.setInt(1, score);
+                updateStatement.setInt(2, userId);
+
+                if (updateStatement.executeUpdate() == 0) {
+                    try (PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
+                        insertStatement.setInt(1, score);
+                        insertStatement.setInt(2, userId);
+                        insertStatement.executeUpdate();
+                    }
+                }
+                connection.commit();
+            } catch (SQLException exception) {
+                connection.rollback();
+                throw exception;
+            }
         }
     }
 
